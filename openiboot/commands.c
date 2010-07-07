@@ -28,6 +28,8 @@
 #include "radio.h"
 #include "als.h"
 #include "piezo.h"
+#include "hardware/power.h"
+#include "power.h"
 
 void cmd_reboot(int argc, char** argv) {
 	Reboot();
@@ -1102,6 +1104,18 @@ void cmd_piezo_play(int argc, char** argv) {
 
 #endif
 
+void cmd_vrom_dump(int argc, char** argv) {
+    unsigned int dest = 0x09000000;
+
+    bufferPrintf("Dumping VROM contents to 0x%x\r\n", dest);
+
+    power_ctrl(POWER_VROM, ON);
+    memcpy((void*) dest, (void*) 0x20000000, 65536);
+    power_ctrl(POWER_VROM, OFF);
+
+	bufferPrintf("done\r\n");
+}
+
 void cmd_help(int argc, char** argv) {
 	OPIBCommand* curCommand = CommandList;
 	while(curCommand->name != NULL) {
@@ -1172,6 +1186,7 @@ OPIBCommand CommandList[] =
 		{"vibrator_loop", "turn the vibrator on in a loop", cmd_vibrator_loop},
 		{"vibrator_once", "vibrate once", cmd_vibrator_once},
 		{"vibrator_off", "turn the vibrator off", cmd_vibrator_off},
+		{"vrom_dump", "dumps the s5l8900 VROM", cmd_vrom_dump},
 #endif
 		{"images_list", "list the images available on NOR", cmd_images_list},
 		{"images_read", "read an image on NOR", cmd_images_read},
